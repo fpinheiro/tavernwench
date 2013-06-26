@@ -65,7 +65,7 @@ namespace IndustryWench {
         public void SetId<TMember>(Expression<Func<T, TMember>> memberLambda) {
             var body = memberLambda.Body;
 
-            if (body.NodeType != ExpressionType.MemberAccess) throw new IdMustBeAPropertyOrFieldException();
+            if (body.NodeType != ExpressionType.MemberAccess) throw new KeyMustBeAPropertyOrFieldException();
 
             _idMemberInfo = ((MemberExpression)body).Member;
         }

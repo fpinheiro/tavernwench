@@ -9,15 +9,9 @@ namespace IndustryWench.Test {
     /// Tests over the IndustryWench's configuration
     /// </summary>
     [TestFixture]
-    public class ConfigTest {
+    public class Config {
 
-        public class User  {
-            public int Id { get; set; }
-            public string FirstName;
-            public virtual string LastName { get;set; }
-
-            public string TheMethod() { return "method"; }
-        }
+        
 
         [SetUp]
         public void ResetConfiguration() {
@@ -48,7 +42,7 @@ namespace IndustryWench.Test {
 
         [Test]
         public void CannotMapAMethodAsId() {
-            Assert.Throws<IdMustBeAPropertyOrFieldException>(() => {
+            Assert.Throws<KeyMustBeAPropertyOrFieldException>(() => {
                 IndustryWench.Config<User>(m => { m.SetId(u => u.TheMethod()); });
             });
         }

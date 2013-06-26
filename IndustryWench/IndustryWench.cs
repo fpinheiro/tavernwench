@@ -41,7 +41,10 @@ namespace IndustryWench {
             return classConfig;
         }
 
-        public static T Remember<T>(Func<T> builder) {
+        /// <summary>
+        /// Records the builder of an object
+        /// </summary>
+        public static void Remember<T>(Func<T> builder) {
             var newMemory = new Memory<T>(builder);
             
             Dictionary<object, Memory> memoryDic;
@@ -61,7 +64,7 @@ namespace IndustryWench {
                 case MemberTypes.Property:
                     keyValue = ((PropertyInfo)keyInfo).GetValue(newMemory.Actor, null); break;
                 default:
-                    throw new IdMustBeAPropertyOrFieldException();
+                    throw new KeyMustBeAPropertyOrFieldException();
             }
 
             //overwriting the memory defined by this builder
@@ -69,8 +72,19 @@ namespace IndustryWench {
                 memoryDic[keyValue] = newMemory;
             else 
                 memoryDic.Add(keyValue, newMemory);
+        }
 
-            return (T) newMemory.Actor;
+        /// <summary>
+        /// Returns the instance saved in Remember  
+        /// </summary>
+        public static T Gimme<T>(object keyValue) {
+            Dictionary<object, Memory> classMemory;
+            Memory targetMemory;
+
+            if (!_memories.TryGetValue(typeof(T), out classMemory)) throw new NeverHeardAboutThisClassException();
+            if (!classMemory.TryGetValue(keyValue, out targetMemory)) throw new NeverHeardAboutThisKeyException();
+
+            return ((Memory<T>)targetMemory).Actor;
         }
 
         /// <summary>
