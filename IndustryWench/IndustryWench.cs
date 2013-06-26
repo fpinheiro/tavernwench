@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using IndustryWench.Exceptions;
+using System.Reflection;
 
 namespace IndustryWench {
 
@@ -12,16 +10,18 @@ namespace IndustryWench {
     /// </summary>
     public static class IndustryWench {
 
-        private static Dictionary<Type, IndustryWenchClassMap> _configurations;
+        private static Dictionary<Type, Config> _configurations;
+        private static Dictionary<Type, Dictionary<object, Memory>> _memories;
 
-        static IndustryWench() { Clear(); }
+        //clear dictionary
+        static IndustryWench() { Forget(); }
 
         /// <summary>
         /// Resgisters the configuration of a certain POCO
         /// Which attribute is the id?
         /// Should we persist th object on the database?
         /// </summary>
-        public static IndustryWenchClassMap Config<T>(Action<IndustryWenchClassMap<T>> mapConfiguration) {
+        public static Config Config<T>(Action<IndustryWenchClassMap<T>> mapConfiguration) {
             var classMap = new IndustryWenchClassMap<T>(mapConfiguration);
             
             if(_configurations.ContainsKey(typeof(T))) 
@@ -35,14 +35,50 @@ namespace IndustryWench {
         /// <summary>
         /// Returns the configuration of a certain type
         /// </summary>
-        public static IndustryWenchClassMap Config<T>(){
-            IndustryWenchClassMap classMap;
-            if (!_configurations.TryGetValue(typeof(T), out classMap)) throw new UnmappedClassException();
-            return classMap;
+        public static Config Config<T>(){
+            Config classConfig;
+            if (!_configurations.TryGetValue(typeof(T), out classConfig)) throw new UnmappedClassException();
+            return classConfig;
         }
 
-        public static void Clear() {
-            _configurations = new Dictionary<Type, IndustryWenchClassMap>();
+        public static T Remember<T>(Func<T> builder) {
+            var newMemory = new Memory<T>(builder);
+            
+            Dictionary<object, Memory> memoryDic;
+            //do I remember the type T ?
+            if (!_memories.TryGetValue(typeof(T), out memoryDic)) {
+                _memories.Add(typeof(T), new Dictionary<object, Memory>());
+                memoryDic = _memories[typeof(T)];
+            }
+
+            //getting the type of the key configured to T
+            var keyInfo = Config<T>().IdMemberInfo;
+            object keyValue;
+
+            switch(keyInfo.MemberType) {
+                case MemberTypes.Field:
+                    keyValue = ((FieldInfo)keyInfo).GetValue(newMemory.Actor); break;
+                case MemberTypes.Property:
+                    keyValue = ((PropertyInfo)keyInfo).GetValue(newMemory.Actor, null); break;
+                default:
+                    throw new IdMustBeAPropertyOrFieldException();
+            }
+
+            //overwriting the memory defined by this builder
+            if (memoryDic.ContainsKey(keyValue))
+                memoryDic[keyValue] = newMemory;
+            else 
+                memoryDic.Add(keyValue, newMemory);
+
+            return (T) newMemory.Actor;
+        }
+
+        /// <summary>
+        /// Forget everything
+        /// </summary>
+        public static void Forget() {
+            _configurations = new Dictionary<Type, Config>();
+            _memories = new Dictionary<Type, Dictionary<object, Memory>>();
         }
     }
 }

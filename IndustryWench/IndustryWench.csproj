@@ -41,7 +41,8 @@
   <ItemGroup>
     <Compile Include="Exceptions\Exceptions.cs" />
     <Compile Include="IndustryWench.cs" />
-    <Compile Include="IndustryWenchClassMap.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="Memory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
