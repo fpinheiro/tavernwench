@@ -49,10 +49,10 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="MoqTypes.cs" />
-    <Compile Include="RememberGimmeNoPersistance.cs" />
+    <Compile Include="Common\MoqTypes.cs" />
+    <Compile Include="NoContextNorPersistance\RememberGimme.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Config.cs" />
+    <Compile Include="NoContextNorPersistance\Config.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

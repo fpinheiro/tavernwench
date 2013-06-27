@@ -7,12 +7,12 @@ namespace IndustryWench.Exceptions {
     /// <summary>
     /// you must configure the class before using it
     /// </summary>
-    public class UnmappedClassException : Exception { }
+    public class NoConfigurationFoundForThisClassException : Exception { }
 
     /// <summary>
-    /// you cannot map a method as a Key
+    /// you cannot map a methodwith parameters as a Key
     /// </summary>
-    public class KeyMustBeAPropertyOrFieldException : Exception { }
+    public class CantUseMethodWithParametersAsKeyException : Exception { }
 
     /// <summary>
     /// no object of the type was declared using IndustryWench.Remember
@@ -23,6 +23,12 @@ namespace IndustryWench.Exceptions {
     /// no object of the with the given key was declared using IndustryWench.Remember
     /// </summary>
     public class NeverHeardAboutThisKeyException : Exception { }
+
+    /// <summary>
+    /// dafuq you're doing man?
+    /// </summary>
+    public class KeyIsUnsupportedMemberType : Exception { }
+    
 
     
 }

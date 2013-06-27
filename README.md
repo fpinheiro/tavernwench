@@ -1,24 +1,46 @@
-﻿Industry Wench
+Tavern Wench
 ==============
 
-Inspired on Ruby's [factory_girl](https://github.com/thoughtbot/factory_girl "A fixtures replacement library in ruby") and starting as a fork of [FactoryGirl.NET](https://github.com/JamesKovacs/FactoryGirl.NET "Minimal implementation of Ruby's factory_girl in .NET"), this project is a fixtures replacement that maps key-attributes in classes instances, ensuring that every call over the key-attribute will return the same instance. In other words, we can ask for the instance **"Johnny"** of the class **User** and the **IndustryWench** will always return the same **"Johnny"** given a context.
+Inspired on Ruby's [factory_girl](https://github.com/thoughtbot/factory_girl "A fixtures replacement library in ruby") and starting as a fork of [FactoryGirl.NET](https://github.com/JamesKovacs/FactoryGirl.NET "Minimal implementation of Ruby's factory_girl in .NET"), **Tavern Wench** implements a factory that maps key-attributes in explicitly defined object instances, assuring that every call over a value of a key-attribute will return the instance you're working with. 
 
+Suppose you're [testing a feature](http://www.specflow.org/specflownew/ "BDD is kinda awesome") that references a *User* instance called *"Jenna"*. Every time you ask **TavernWench** for *"Jenna"* she will return the same *"Jenna"*. Here's how you it:
 
-To configure the factory:
+First teach the wench how to deal with your class (or don't if you're fine with the [default behavior](#default_config)):
 
+```c#
     IndustryWench.Configure<User>(m => {
-                                       m.SetId(u => u.FirstName);
+                                       m.SetKey(u => u.FirstName);
                                        m.Persist = true;
                                 });
+```
 
-
-To define an actor:
-
+Then, explicitly declare your object:
+```c#
     IndustryWench.Remember(() => new User {
-                                  FirstName = "Johnny",
-                                  LastName = "Goode"
+                                  FirstName = "Jenna",
+                                  LastName = "Jameson"
                                 });
+```
 
-To use a factory:
+Now ask nicely for it:
+```c#
+    var user = IndustryWench.Gimme<User>("Jenna");
+```
 
-    var user = IndustryWench.Gimme<User>("Johnny");
+## Configuration is for phonies ##
+<a id="#default_config"></a>
+
+If you're lazy <del>like me</del> and don't want to use `IndustryWench.Configure` to determine how the factory should behave, the wench will work fine as well. The default behavior is to **not persist** the objects and to use **ToString()** as the Key. So to properly get a *Fruit* with no previous configuration at all we should query the wench like this:
+```c#
+	public class Fruit {
+        public string Name;
+        public int Color { get; set; }
+
+        public override string ToString() {
+            return "A " + this.Color.ToString() + " " + this.Name;
+        }
+    }
+
+    IndustryWench.Remember(() => new Fruit { Name = "banana", Color = "yellow" });
+    var banana = IndustryWench.Gimme<Fruit>("A yellow banana");
+```

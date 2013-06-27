@@ -1,6 +1,6 @@
-﻿using System;
+﻿using IndustryWench.Exceptions;
+using System;
 using System.Collections.Generic;
-using IndustryWench.Exceptions;
 using System.Reflection;
 
 namespace IndustryWench {
@@ -23,21 +23,21 @@ namespace IndustryWench {
         /// </summary>
         public static Config Config<T>(Action<IndustryWenchClassMap<T>> mapConfiguration) {
             var classMap = new IndustryWenchClassMap<T>(mapConfiguration);
-            
-            if(_configurations.ContainsKey(typeof(T))) 
+
+            if (_configurations.ContainsKey(typeof(T)))
                 _configurations[typeof(T)] = classMap;
-            else 
+            else
                 _configurations.Add(typeof(T), classMap);
-            
+
             return classMap;
         }
 
         /// <summary>
         /// Returns the configuration of a certain type
         /// </summary>
-        public static Config Config<T>(){
+        public static Config Config<T>() {
             Config classConfig;
-            if (!_configurations.TryGetValue(typeof(T), out classConfig)) throw new UnmappedClassException();
+            if (!_configurations.TryGetValue(typeof(T), out classConfig)) throw new NoConfigurationFoundForThisClassException();
             return classConfig;
         }
 
@@ -46,7 +46,7 @@ namespace IndustryWench {
         /// </summary>
         public static void Remember<T>(Func<T> builder) {
             var newMemory = new Memory<T>(builder);
-            
+
             Dictionary<object, Memory> memoryDic;
             //do I remember the type T ?
             if (!_memories.TryGetValue(typeof(T), out memoryDic)) {
@@ -55,22 +55,33 @@ namespace IndustryWench {
             }
 
             //getting the type of the key configured to T
-            var keyInfo = Config<T>().IdMemberInfo;
-            object keyValue;
+            MemberInfo keyInfo;
+            try {
+                keyInfo = Config<T>().IdMemberInfo;
+            } catch (NoConfigurationFoundForThisClassException) {
+                keyInfo = IndustryWench.Config<T>(m => m.SetId(x => x.ToString())).IdMemberInfo;
+            }
 
-            switch(keyInfo.MemberType) {
+            object keyValue;
+            switch (keyInfo.MemberType) {
                 case MemberTypes.Field:
                     keyValue = ((FieldInfo)keyInfo).GetValue(newMemory.Actor); break;
                 case MemberTypes.Property:
                     keyValue = ((PropertyInfo)keyInfo).GetValue(newMemory.Actor, null); break;
+                case MemberTypes.Method:
+                    var method = (MethodInfo)keyInfo;
+                    if (method.GetParameters().Length > 0) throw new CantUseMethodWithParametersAsKeyException();
+                    keyValue = method.Invoke(newMemory.Actor, null);
+                    break;
                 default:
-                    throw new KeyMustBeAPropertyOrFieldException();
+                    throw new KeyIsUnsupportedMemberType();
             }
+
 
             //overwriting the memory defined by this builder
             if (memoryDic.ContainsKey(keyValue))
                 memoryDic[keyValue] = newMemory;
-            else 
+            else
                 memoryDic.Add(keyValue, newMemory);
         }
 

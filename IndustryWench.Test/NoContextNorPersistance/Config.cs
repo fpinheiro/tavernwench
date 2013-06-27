@@ -3,15 +3,14 @@ using System.Text;
 using System.Collections.Generic;
 using NUnit.Framework;
 using IndustryWench.Exceptions;
+using IndustryWench.Test.Common;
 
-namespace IndustryWench.Test {
+namespace IndustryWench.Test.NoContextNorPersistance {
     /// <summary>
     /// Tests over the IndustryWench's configuration
     /// </summary>
     [TestFixture]
     public class Config {
-
-        
 
         [SetUp]
         public void ResetConfiguration() {
@@ -41,9 +40,15 @@ namespace IndustryWench.Test {
         }
 
         [Test]
-        public void CannotMapAMethodAsId() {
-            Assert.Throws<KeyMustBeAPropertyOrFieldException>(() => {
-                IndustryWench.Config<User>(m => { m.SetId(u => u.TheMethod()); });
+        public void ConfigMethodAsId() {
+            IndustryWench.Config<User>(m => { m.SetId(u => u.TheMethod()); });
+            Assert.That(IndustryWench.Config<User>().Id, Is.EqualTo("TheMethod"));
+        }
+
+        [Test]
+        public void CannotMapAMethodWithParameterAsKey() {
+            Assert.Throws<CantUseMethodWithParametersAsKeyException>(() => {
+                IndustryWench.Config<User>(m => { m.SetId(u => u.TheMethod("TheParameter")); });
             });
         }
 
@@ -75,7 +80,8 @@ namespace IndustryWench.Test {
 
         [Test]
         public void CannotAskForNonExistentConfig() {
-            Assert.Throws<UnmappedClassException>(() => { var a = IndustryWench.Config<User>().Id; });
+            Assert.Throws<NoConfigurationFoundForThisClassException>(() => { 
+                var a = IndustryWench.Config<User>().Id; });
         }
 
     }

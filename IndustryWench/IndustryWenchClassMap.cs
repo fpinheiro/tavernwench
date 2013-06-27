@@ -11,11 +11,19 @@ namespace IndustryWench {
     /// * which one is the id column?
     /// * should I persist this class's actors?
     /// </summary>
-    public class Config {
+    public class IndustryWenchClassMap {
 
         protected Type _classType;
-        
         protected MemberInfo _idMemberInfo;
+
+        /// <summary>
+        /// should I try to store this actor on the database?
+        /// </summary>
+        protected bool Persist { get; set; }
+
+        protected IndustryWenchClassMap(Type classType) {
+            _classType = classType;
+        }
 
         /// <summary>
         /// le id's MemberInfo
@@ -35,25 +43,12 @@ namespace IndustryWench {
             }
 
         }
-        
-        /// <summary>
-        /// should I try to store this actor on a database?
-        /// </summary>
-        public bool Persist { get; set; }
-
-        /// <summary>
-        /// protected constructor cause people should not be able to instance this class directly
-        /// it must be created through the IndustryWenchClassMap<T>
-        /// </summary>
-        protected Config(Type classType) {
-            _classType = classType;
-        }
     }
 
     /// <summary>
     /// Typed configuration to store stuff via lambda expressions
     /// </summary>
-    public class IndustryWenchClassMap<T> : Config {
+    public class IndustryWenchClassMap<T> : IndustryWenchClassMap {
 
         public IndustryWenchClassMap(Action<IndustryWenchClassMap<T>> mapConfiguration) : base(typeof(T)) {
             mapConfiguration(this);
@@ -65,16 +60,9 @@ namespace IndustryWench {
         public void SetId<TMember>(Expression<Func<T, TMember>> memberLambda) {
             var body = memberLambda.Body;
 
-            switch(body.NodeType) {
-                case ExpressionType.MemberAccess:
-                    _idMemberInfo = ((MemberExpression)body).Member; break;
-                case ExpressionType.Call:
-                    var parametersCount = ((MethodCallExpression)body).Arguments.Count;
-                    if (parametersCount > 0) throw new CantUseMethodWithParametersAsKeyException();
-                    _idMemberInfo = ((MethodCallExpression)body).Method; break;
-                default:
-                    throw new KeyIsUnsupportedMemberType();
-            }
+            if (body.NodeType != ExpressionType.MemberAccess) throw new IdMustBeAPropertyOrFieldException();
+
+            _idMemberInfo = ((MemberExpression)body).Member;
         }
     }
 }
