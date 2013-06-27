@@ -1,28 +1,29 @@
-﻿using IndustryWench.Exceptions;
+﻿
+using TavernWench.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace IndustryWench {
+namespace TavernWench {
 
     /// <summary>
     /// Configure, Declare and Get instances of an object
     /// </summary>
-    public static class IndustryWench {
+    public static class TavernWench {
 
         private static Dictionary<Type, Config> _configurations;
         private static Dictionary<Type, Dictionary<object, Memory>> _memories;
 
         //clear dictionary
-        static IndustryWench() { Forget(); }
+        static TavernWench() { Forget(); }
 
         /// <summary>
         /// Resgisters the configuration of a certain POCO
         /// Which attribute is the id?
         /// Should we persist th object on the database?
         /// </summary>
-        public static Config Config<T>(Action<IndustryWenchClassMap<T>> mapConfiguration) {
-            var classMap = new IndustryWenchClassMap<T>(mapConfiguration);
+        public static Config Config<T>(Action<TavernWenchClassMap<T>> mapConfiguration) {
+            var classMap = new TavernWenchClassMap<T>(mapConfiguration);
 
             if (_configurations.ContainsKey(typeof(T)))
                 _configurations[typeof(T)] = classMap;
@@ -57,21 +58,21 @@ namespace IndustryWench {
             //getting the type of the key configured to T
             MemberInfo keyInfo;
             try {
-                keyInfo = Config<T>().IdMemberInfo;
+                keyInfo = Config<T>().KeyMemberInfo;
             } catch (NoConfigurationFoundForThisClassException) {
-                keyInfo = IndustryWench.Config<T>(m => m.SetId(x => x.ToString())).IdMemberInfo;
+                keyInfo = TavernWench.Config<T>(m => m.SetKey(x => x.ToString())).KeyMemberInfo;
             }
 
             object keyValue;
             switch (keyInfo.MemberType) {
                 case MemberTypes.Field:
-                    keyValue = ((FieldInfo)keyInfo).GetValue(newMemory.Actor); break;
+                    keyValue = ((FieldInfo)keyInfo).GetValue(newMemory.TargetObject); break;
                 case MemberTypes.Property:
-                    keyValue = ((PropertyInfo)keyInfo).GetValue(newMemory.Actor, null); break;
+                    keyValue = ((PropertyInfo)keyInfo).GetValue(newMemory.TargetObject, null); break;
                 case MemberTypes.Method:
                     var method = (MethodInfo)keyInfo;
                     if (method.GetParameters().Length > 0) throw new CantUseMethodWithParametersAsKeyException();
-                    keyValue = method.Invoke(newMemory.Actor, null);
+                    keyValue = method.Invoke(newMemory.TargetObject, null);
                     break;
                 default:
                     throw new KeyIsUnsupportedMemberType();
@@ -95,7 +96,7 @@ namespace IndustryWench {
             if (!_memories.TryGetValue(typeof(T), out classMemory)) throw new NeverHeardAboutThisClassException();
             if (!classMemory.TryGetValue(keyValue, out targetMemory)) throw new NeverHeardAboutThisKeyException();
 
-            return ((Memory<T>)targetMemory).Actor;
+            return ((Memory<T>)targetMemory).TargetObject;
         }
 
         /// <summary>

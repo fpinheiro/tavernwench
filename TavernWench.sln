@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IndustryWench", "IndustryWench\IndustryWench.csproj", "{1CDAC212-D9F0-4D6B-8C0E-2A4B734EF996}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TavernWench", "TavernWench\TavernWench.csproj", "{1CDAC212-D9F0-4D6B-8C0E-2A4B734EF996}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IndustryWench.Test", "IndustryWench.Test\IndustryWench.Test.csproj", "{D01D2732-7576-4648-A886-02A8688CC476}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TavernWench.Test", "TavernWench.Test\TavernWench.Test.csproj", "{D01D2732-7576-4648-A886-02A8688CC476}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

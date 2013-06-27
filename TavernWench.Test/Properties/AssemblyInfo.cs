@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("IndustryWench")]
+[assembly: AssemblyTitle("TavernWench.Test")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("IndustryWench")]
+[assembly: AssemblyProduct("TavernWench.Test")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("cfc85fa1-6dbb-435a-b45f-99fad0ee93c8")]
+[assembly: Guid("d1c8b78e-001b-4f98-9cc3-dc57e82b251d")]
 
 // Version information for an assembly consists of the following four values:
 //

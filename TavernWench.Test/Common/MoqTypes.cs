@@ -1,5 +1,5 @@
 ﻿
-namespace IndustryWench.Test.Common {
+namespace TavernWench.Test.Common {
     public class User {
         public int Id { get; set; }
         public string FirstName;

@@ -2,9 +2,9 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using IndustryWench.Exceptions;
+using TavernWench.Exceptions;
 
-namespace IndustryWench {
+namespace TavernWench {
 
     /// <summary>
     /// Stores the configuration of a class 
@@ -15,23 +15,23 @@ namespace IndustryWench {
 
         protected Type _classType;
         
-        protected MemberInfo _idMemberInfo;
+        protected MemberInfo _keyMemberInfo;
 
         /// <summary>
         /// le id's MemberInfo
         /// </summary>
-        public MemberInfo IdMemberInfo {
+        public MemberInfo KeyMemberInfo {
             get {
-                return _idMemberInfo;
+                return _keyMemberInfo;
             }
         }
 
         /// <summary>
         /// le id attribute's name
         /// </summary>
-        public string Id {
+        public string Key {
             get {
-                return _idMemberInfo != null ? _idMemberInfo.Name : null;
+                return _keyMemberInfo != null ? _keyMemberInfo.Name : null;
             }
 
         }
@@ -43,7 +43,7 @@ namespace IndustryWench {
 
         /// <summary>
         /// protected constructor cause people should not be able to instance this class directly
-        /// it must be created through the IndustryWenchClassMap<T>
+        /// it must be created through the TavernWenchClassMap<T>
         /// </summary>
         protected Config(Type classType) {
             _classType = classType;
@@ -53,25 +53,25 @@ namespace IndustryWench {
     /// <summary>
     /// Typed configuration to store stuff via lambda expressions
     /// </summary>
-    public class IndustryWenchClassMap<T> : Config {
+    public class TavernWenchClassMap<T> : Config {
 
-        public IndustryWenchClassMap(Action<IndustryWenchClassMap<T>> mapConfiguration) : base(typeof(T)) {
+        public TavernWenchClassMap(Action<TavernWenchClassMap<T>> mapConfiguration) : base(typeof(T)) {
             mapConfiguration(this);
         }
 
         /// <summary>
         /// saves le id member from lambda
         /// </summary>
-        public void SetId<TMember>(Expression<Func<T, TMember>> memberLambda) {
+        public void SetKey<TMember>(Expression<Func<T, TMember>> memberLambda) {
             var body = memberLambda.Body;
 
             switch(body.NodeType) {
                 case ExpressionType.MemberAccess:
-                    _idMemberInfo = ((MemberExpression)body).Member; break;
+                    _keyMemberInfo = ((MemberExpression)body).Member; break;
                 case ExpressionType.Call:
                     var parametersCount = ((MethodCallExpression)body).Arguments.Count;
                     if (parametersCount > 0) throw new CantUseMethodWithParametersAsKeyException();
-                    _idMemberInfo = ((MethodCallExpression)body).Method; break;
+                    _keyMemberInfo = ((MethodCallExpression)body).Method; break;
                 default:
                     throw new KeyIsUnsupportedMemberType();
             }

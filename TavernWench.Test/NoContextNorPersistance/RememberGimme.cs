@@ -1,8 +1,8 @@
-﻿using IndustryWench.Exceptions;
-using IndustryWench.Test.Common;
+﻿using TavernWench.Exceptions;
+using TavernWench.Test.Common;
 using NUnit.Framework;
 
-namespace IndustryWench.Test.NoContextNorPersistance {
+namespace TavernWench.Test.NoContextNorPersistance {
     /// <summary>
     /// Remember, remeber the 5th of November
     /// </summary>
@@ -26,18 +26,18 @@ namespace IndustryWench.Test.NoContextNorPersistance {
 
         #region helpers
         private User RememberAndGimme(string firstName, string lastName) {
-            IndustryWench.Remember(() => new User {
+            TavernWench.Remember(() => new User {
                 FirstName = firstName,
                 LastName = lastName
             });
-            return IndustryWench.Gimme<User>(firstName);
+            return TavernWench.Gimme<User>(firstName);
         }
         #endregion
 
         [SetUp]
         public void ResetConfiguration() {
-            IndustryWench.Forget();
-            IndustryWench.Config<User>(m => { m.SetId(u => u.FirstName); });
+            TavernWench.Forget();
+            TavernWench.Config<User>(m => { m.SetKey(u => u.FirstName); });
         }
 
         [Test]
@@ -57,9 +57,9 @@ namespace IndustryWench.Test.NoContextNorPersistance {
         public void RemebersMultipleItemsOfDifferentTypesWithConfig() {
             var johnny = RememberAndGimme(_jennasFirstName, _jennasLastName);
 
-            IndustryWench.Config<Fruit>(m => { m.SetId(u => u.Name); });
-            IndustryWench.Remember(() => new Fruit { Name = _banana });
-            var banana = IndustryWench.Gimme<Fruit>(_banana);
+            TavernWench.Config<Fruit>(m => { m.SetKey(u => u.Name); });
+            TavernWench.Remember(() => new Fruit { Name = _banana });
+            var banana = TavernWench.Gimme<Fruit>(_banana);
 
             Assert.That(johnny.FirstName, Is.EqualTo(_jennasFirstName));
             Assert.That(johnny.LastName, Is.EqualTo(_jennasLastName));
@@ -68,12 +68,12 @@ namespace IndustryWench.Test.NoContextNorPersistance {
 
         [Test]
         public void RememberUnconfiguredType() {
-            IndustryWench.Remember(() => new Fruit { Name = _banana, Color = _yellow });
-            IndustryWench.Remember(() => new Fruit { Name = _apple, Color = _red });
+            TavernWench.Remember(() => new Fruit { Name = _banana, Color = _yellow });
+            TavernWench.Remember(() => new Fruit { Name = _apple, Color = _red });
 
             // since we did'nt configured the type the Wench will assume that the first declared property is the key
-            var banana = IndustryWench.Gimme<Fruit>("A " + _yellow + " " + _banana);
-            var apple = IndustryWench.Gimme<Fruit>("A " + _red + " " + _apple);
+            var banana = TavernWench.Gimme<Fruit>("A " + _yellow + " " + _banana);
+            var apple = TavernWench.Gimme<Fruit>("A " + _red + " " + _apple);
 
             Assert.That(banana.ToString(), Is.EqualTo("A " + _yellow + " " + _banana));
             Assert.That(apple.ToString(), Is.EqualTo("A " + _red + " " + _apple));
@@ -81,16 +81,16 @@ namespace IndustryWench.Test.NoContextNorPersistance {
 
         [Test]
         public void CannotAskForUnknownType() {
-            Assert.Throws<NeverHeardAboutThisClassException>(() => { IndustryWench.Gimme<User>(_jennasFirstName); });
+            Assert.Throws<NeverHeardAboutThisClassException>(() => { TavernWench.Gimme<User>(_jennasFirstName); });
         }
 
         [Test]
         public void CannotAskForUnknownKey() {
-            IndustryWench.Remember(() => new User {
+            TavernWench.Remember(() => new User {
                 FirstName = _jennasFirstName,
                 LastName = _jennasChangedLastName
             });
-            Assert.Throws<NeverHeardAboutThisKeyException>(() => { IndustryWench.Gimme<User>(_petersFirstName); });
+            Assert.Throws<NeverHeardAboutThisKeyException>(() => { TavernWench.Gimme<User>(_petersFirstName); });
         }
     }
 }

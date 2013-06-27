@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace IndustryWench.Exceptions {
+namespace TavernWench.Exceptions {
     /// <summary>
     /// you must configure the class before using it
     /// </summary>
@@ -15,12 +12,12 @@ namespace IndustryWench.Exceptions {
     public class CantUseMethodWithParametersAsKeyException : Exception { }
 
     /// <summary>
-    /// no object of the type was declared using IndustryWench.Remember
+    /// no object of the type was declared using TavernWench.Remember
     /// </summary>
     public class NeverHeardAboutThisClassException : Exception { }
 
     /// <summary>
-    /// no object of the with the given key was declared using IndustryWench.Remember
+    /// no object of the with the given key was declared using TavernWench.Remember
     /// </summary>
     public class NeverHeardAboutThisKeyException : Exception { }
 

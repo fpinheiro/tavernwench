@@ -6,8 +6,8 @@
     <ProjectGuid>{D01D2732-7576-4648-A886-02A8688CC476}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IndustryWench.Test</RootNamespace>
-    <AssemblyName>IndustryWench.Test</AssemblyName>
+    <RootNamespace>TavernWench.Test</RootNamespace>
+    <AssemblyName>TavernWench.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -55,12 +55,14 @@
     <Compile Include="NoContextNorPersistance\Config.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IndustryWench\IndustryWench.csproj">
+    <ProjectReference Include="..\TavernWench\TavernWench.csproj">
       <Project>{1cdac212-d9f0-4d6b-8c0e-2a4b734ef996}</Project>
-      <Name>IndustryWench</Name>
+      <Name>TavernWench</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

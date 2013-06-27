@@ -1,30 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿
+using System;
 
-namespace IndustryWench {
+namespace TavernWench {
     /// <summary>
     /// the key value and the actor pointed  
     /// </summary>
     internal class Memory<T> : Memory  {
         private Func<T> _constructor;
         
-        public T Actor { 
+        internal T TargetObject { 
             get {
                 //if there's no actor's cached instance we build it
-                if (_actor == null) _actor = _constructor();
-                return (T)_actor;
+                if (_object == null) _object = _constructor();
+                return (T)_object;
             } 
         }
 
-        public Memory( Func<T> actorConstructor ) : base() {
+        internal Memory( Func<T> actorConstructor ) : base() {
             _constructor = actorConstructor;
         }
     }
 
     internal class Memory {
-        protected object _actor;
+        protected object _object;
 
         protected Memory () { }
     }
