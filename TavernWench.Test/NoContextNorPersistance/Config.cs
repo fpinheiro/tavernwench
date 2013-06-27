@@ -53,10 +53,24 @@ namespace TavernWench.Test.NoContextNorPersistance {
         // Configuring Persistance
         // -------------------------------------------------------
         [Test]
-        public void PersistOnlyConfig() {
+        public void ByDefaultDoNotOverwritePreviousConfigs() {
             TavernWench.Config<User>(m => { m.Persist = true; });
+            TavernWench.Config<User>(m => { m.TableName = "tbl_User"; });
+            TavernWench.Config<User>(m => { m.SetDatabasePk(u => u.LastName); });
+
             Assert.That(TavernWench.Config<User>().Persist, Is.True);
+            Assert.That(TavernWench.Config<User>().TableName, Is.EqualTo("tbl_User"));
+            Assert.That(TavernWench.Config<User>().DatabasePk, Is.EqualTo("LastName"));
             Assert.That(TavernWench.Config<User>().Key, Is.Null);
+        }
+
+        [Test]
+        public void OverwritePreviousConfigIfITellSo() {
+            TavernWench.Config<User>(m => { m.Persist = true; });
+            TavernWench.Config<User>(m => { m.TableName = "tbl_User"; }, false);
+            
+            Assert.That(TavernWench.Config<User>().Persist, Is.Null);
+            Assert.That(TavernWench.Config<User>().TableName, Is.EqualTo("tbl_User"));
         }
 
         // -------------------------------------------------------

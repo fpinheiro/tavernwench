@@ -22,15 +22,16 @@ namespace TavernWench {
         /// Which attribute is the id?
         /// Should we persist th object on the database?
         /// </summary>
-        public static Config Config<T>(Action<TavernWenchClassMap<T>> mapConfiguration) {
-            var classMap = new TavernWenchClassMap<T>(mapConfiguration);
+        public static Config Config<T>(Action<Config<T>> mapConfiguration, bool shouldMergeWithCurrent = true) {
+            var newConfig = new Config<T>(mapConfiguration);
 
             if (_configurations.ContainsKey(typeof(T)))
-                _configurations[typeof(T)] = classMap;
+                if (shouldMergeWithCurrent) _configurations[typeof(T)].Merge(newConfig);
+                else _configurations[typeof(T)] = newConfig;
             else
-                _configurations.Add(typeof(T), classMap);
+                _configurations.Add(typeof(T), newConfig);
 
-            return classMap;
+            return _configurations[typeof(T)];
         }
 
         /// <summary>
@@ -58,9 +59,9 @@ namespace TavernWench {
             //getting the type of the key configured to T
             MemberInfo keyInfo;
             try {
-                keyInfo = Config<T>().KeyMemberInfo;
+                keyInfo = Config<T>().KeyInfo;
             } catch (NoConfigurationFoundForThisClassException) {
-                keyInfo = TavernWench.Config<T>(m => m.SetKey(x => x.ToString())).KeyMemberInfo;
+                keyInfo = TavernWench.Config<T>(m => m.SetKey(x => x.ToString())).KeyInfo;
             }
 
             object keyValue;

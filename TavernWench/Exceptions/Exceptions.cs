@@ -25,7 +25,10 @@ namespace TavernWench.Exceptions {
     /// dafuq you're doing man?
     /// </summary>
     public class KeyIsUnsupportedMemberType : Exception { }
-    
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public class DatabasePKMustBeFieldOrProperty : Exception { }
     
 }

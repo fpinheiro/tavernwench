@@ -14,32 +14,6 @@ namespace TavernWench {
     public class Config {
 
         protected Type _classType;
-        
-        protected MemberInfo _keyMemberInfo;
-
-        /// <summary>
-        /// le id's MemberInfo
-        /// </summary>
-        public MemberInfo KeyMemberInfo {
-            get {
-                return _keyMemberInfo;
-            }
-        }
-
-        /// <summary>
-        /// le id attribute's name
-        /// </summary>
-        public string Key {
-            get {
-                return _keyMemberInfo != null ? _keyMemberInfo.Name : null;
-            }
-
-        }
-        
-        /// <summary>
-        /// should I try to store this actor on a database?
-        /// </summary>
-        public bool Persist { get; set; }
 
         /// <summary>
         /// protected constructor cause people should not be able to instance this class directly
@@ -48,14 +22,77 @@ namespace TavernWench {
         protected Config(Type classType) {
             _classType = classType;
         }
+
+        #region Wench Configuration
+        
+        protected MemberInfo _wenchKey;
+
+        /// <summary>
+        /// le id's MemberInfo
+        /// </summary>
+        public MemberInfo KeyInfo {
+            get {
+                return _wenchKey;
+            }
+        }
+
+        /// <summary>
+        /// le id attribute's name
+        /// </summary>
+        public string Key {
+            get {
+                return _wenchKey != null ? _wenchKey.Name : null;
+            }
+
+        }
+
+        #endregion
+
+        #region Persistence
+
+        /// <summary>
+        /// should I try to store this actor on a database?
+        /// </summary>
+        public bool? Persist { get; set; }
+
+        public string TableName { get; set; }
+
+        protected MemberInfo _databasePkInfo;
+
+        public MemberInfo DatabasePkInfo {
+            get {
+                return _databasePkInfo;
+            }
+        }
+
+        /// <summary>
+        /// le id attribute's name
+        /// </summary>
+        public string DatabasePk {
+            get {
+                return _databasePkInfo != null ? _databasePkInfo.Name : null;
+            }
+        }
+
+        #endregion        
+    
+        /// <summary>
+        /// Merges this configuration with the attributes defined in new one
+        /// </summary>
+        internal void Merge(Config newConfig) {
+            this._wenchKey = newConfig.KeyInfo ?? this._wenchKey;
+            this._databasePkInfo = newConfig.DatabasePkInfo ?? this._databasePkInfo;
+            this.Persist = newConfig.Persist ?? this.Persist;
+            this.TableName = newConfig.TableName ?? this.TableName;
+        }
     }
 
     /// <summary>
     /// Typed configuration to store stuff via lambda expressions
     /// </summary>
-    public class TavernWenchClassMap<T> : Config {
+    public class Config<T> : Config {
 
-        public TavernWenchClassMap(Action<TavernWenchClassMap<T>> mapConfiguration) : base(typeof(T)) {
+        public Config(Action<Config<T>> mapConfiguration) : base(typeof(T)) {
             mapConfiguration(this);
         }
 
@@ -67,14 +104,25 @@ namespace TavernWench {
 
             switch(body.NodeType) {
                 case ExpressionType.MemberAccess:
-                    _keyMemberInfo = ((MemberExpression)body).Member; break;
+                    _wenchKey = ((MemberExpression)body).Member; break;
                 case ExpressionType.Call:
                     var parametersCount = ((MethodCallExpression)body).Arguments.Count;
                     if (parametersCount > 0) throw new CantUseMethodWithParametersAsKeyException();
-                    _keyMemberInfo = ((MethodCallExpression)body).Method; break;
+                    _wenchKey = ((MethodCallExpression)body).Method; break;
                 default:
                     throw new KeyIsUnsupportedMemberType();
             }
+        }
+
+        /// <summary>
+        /// tell me which attritube is your db pk?
+        /// </summary>
+        public void SetDatabasePk<TMember>(Expression<Func<T, TMember>> memberLambda) {
+            var body = memberLambda.Body;
+            
+            if (body.NodeType != ExpressionType.MemberAccess) throw new DatabasePKMustBeFieldOrProperty();
+         
+            _databasePkInfo = ((MemberExpression)body).Member;
         }
     }
 }
