@@ -2,7 +2,7 @@
 using TavernWench.Test.Common;
 using NUnit.Framework;
 
-namespace TavernWench.Test.NoContextNorPersistance {
+namespace TavernWench.Test.NoPersistence {
     /// <summary>
     /// Remember, remeber the 5th of November
     /// </summary>

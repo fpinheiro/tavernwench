@@ -2,7 +2,7 @@
 using TavernWench.Exceptions;
 using TavernWench.Test.Common;
 
-namespace TavernWench.Test.NoContextNorPersistance {
+namespace TavernWench.Test.NoPersistence {
     /// <summary>
     /// Tests over the TavernWench's configuration
     /// </summary>
