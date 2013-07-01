@@ -1,4 +1,5 @@
 ﻿
+using PetaPoco;
 using System;
 
 namespace TavernWench {
@@ -10,14 +11,13 @@ namespace TavernWench {
         
         internal T TargetObject { 
             get {
-                //if there's no actor's cached instance we build it
-                if (_object == null) _object = _constructor();
                 return (T)_object;
             } 
         }
 
-        internal Memory( Func<T> actorConstructor ) : base() {
+        internal Memory( Func<T> actorConstructor) : base() {
             _constructor = actorConstructor;
+            _object = _constructor();
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿
 namespace TavernWench.Test.Common {
-    public class User {
+
+    public class Actor {
         public int Id { get; set; }
         public string FirstName;
         public virtual string LastName { get; set; }
@@ -10,7 +11,7 @@ namespace TavernWench.Test.Common {
     }
 
     public class Fruit {
-        public string Name;
+        public string Name { get; set; }
         public string Color { get; set; }
 
         public override string ToString() {

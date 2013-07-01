@@ -13,14 +13,14 @@ namespace TavernWench {
     /// </summary>
     public class Config {
 
-        protected Type _classType;
+        public Type ClassType { get; private set; }
 
         /// <summary>
         /// protected constructor cause people should not be able to instance this class directly
         /// it must be created through the TavernWenchClassMap<T>
         /// </summary>
         protected Config(Type classType) {
-            _classType = classType;
+            ClassType = classType;
         }
 
         #region Wench Configuration
@@ -57,9 +57,9 @@ namespace TavernWench {
 
         public string TableName { get; set; }
 
-        protected MemberInfo _databasePkInfo;
+        protected PropertyInfo _databasePkInfo;
 
-        public MemberInfo DatabasePkInfo {
+        public PropertyInfo DatabasePkInfo {
             get {
                 return _databasePkInfo;
             }
@@ -120,9 +120,11 @@ namespace TavernWench {
         public void SetDatabasePk<TMember>(Expression<Func<T, TMember>> memberLambda) {
             var body = memberLambda.Body;
             
-            if (body.NodeType != ExpressionType.MemberAccess) throw new DatabasePKMustBeFieldOrProperty();
+            if (body.NodeType != ExpressionType.MemberAccess
+                || ((MemberExpression)body).Member.MemberType != MemberTypes.Property)
+                throw new DatabasePKMustBeProperty();
          
-            _databasePkInfo = ((MemberExpression)body).Member;
+            _databasePkInfo = (PropertyInfo)((MemberExpression)body).Member;
         }
     }
 }

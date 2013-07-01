@@ -3,6 +3,8 @@ using TavernWench.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using PetaPoco;
+using System.Configuration;
 
 namespace TavernWench {
 
@@ -39,7 +41,10 @@ namespace TavernWench {
         /// </summary>
         public static Config Config<T>() {
             Config classConfig;
-            if (!_configurations.TryGetValue(typeof(T), out classConfig)) throw new NoConfigurationFoundForThisClassException();
+            if (!_configurations.TryGetValue(typeof(T), out classConfig) || classConfig.KeyInfo == null) {
+                //returns the default configuration
+                classConfig = TavernWench.Config<T>(m => m.SetKey(x => x.ToString()));
+            }
             return classConfig;
         }
 
@@ -49,6 +54,10 @@ namespace TavernWench {
         public static void Remember<T>(Func<T> builder) {
             var newMemory = new Memory<T>(builder);
 
+            //getting configuration to see if we need to persist the object
+            var config = TavernWench.Config<T>();
+            TavernWench.PersistIfYouMust(config, newMemory.TargetObject);
+
             Dictionary<object, Memory> memoryDic;
             //do I remember the type T ?
             if (!_memories.TryGetValue(typeof(T), out memoryDic)) {
@@ -56,29 +65,20 @@ namespace TavernWench {
                 memoryDic = _memories[typeof(T)];
             }
 
-            //getting the type of the key configured to T
-            MemberInfo keyInfo;
-            try {
-                keyInfo = Config<T>().KeyInfo;
-            } catch (NoConfigurationFoundForThisClassException) {
-                keyInfo = TavernWench.Config<T>(m => m.SetKey(x => x.ToString())).KeyInfo;
-            }
-
             object keyValue;
-            switch (keyInfo.MemberType) {
+            switch (config.KeyInfo.MemberType) {
                 case MemberTypes.Field:
-                    keyValue = ((FieldInfo)keyInfo).GetValue(newMemory.TargetObject); break;
+                    keyValue = ((FieldInfo)config.KeyInfo).GetValue(newMemory.TargetObject); break;
                 case MemberTypes.Property:
-                    keyValue = ((PropertyInfo)keyInfo).GetValue(newMemory.TargetObject, null); break;
+                    keyValue = ((PropertyInfo)config.KeyInfo).GetValue(newMemory.TargetObject, null); break;
                 case MemberTypes.Method:
-                    var method = (MethodInfo)keyInfo;
+                    var method = (MethodInfo)config.KeyInfo;
                     if (method.GetParameters().Length > 0) throw new CantUseMethodWithParametersAsKeyException();
                     keyValue = method.Invoke(newMemory.TargetObject, null);
                     break;
                 default:
                     throw new KeyIsUnsupportedMemberType();
             }
-
 
             //overwriting the memory defined by this builder
             if (memoryDic.ContainsKey(keyValue))
@@ -106,6 +106,22 @@ namespace TavernWench {
         public static void Forget() {
             _configurations = new Dictionary<Type, Config>();
             _memories = new Dictionary<Type, Dictionary<object, Memory>>();
+        }
+
+        /// <summary>
+        /// saves the object as it is on the database, ovrewriting possible instances
+        /// </summary>
+        private static void PersistIfYouMust(Config config, object theObject) {
+            if (config.Persist ?? false) {
+                using (var db = new Database(ConfigurationManager.AppSettings["wench:connString"] ?? "")) {
+                    var pkInfo = config.DatabasePkInfo;
+                    var autoIncrement = pkInfo == null || pkInfo.GetValue(theObject, null) == null;
+                    db.Insert(config.TableName ?? config.ClassType.Name, 
+                              config.DatabasePk ?? "Id", 
+                              autoIncrement, 
+                              theObject);
+                }
+            }
         }
     }
 }

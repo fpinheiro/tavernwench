@@ -7,7 +7,7 @@ namespace TavernWench.Test.NoPersistence {
     /// Remember, remeber the 5th of November
     /// </summary>
     [TestFixture]
-    public class RememberGimmeNoPersistance {
+    public class RememberGimmeNoPersistence {
 
         #region mock_data
         private const string _jennasFirstName = "Jenna";
@@ -25,19 +25,19 @@ namespace TavernWench.Test.NoPersistence {
         #endregion
 
         #region helpers
-        private User RememberAndGimme(string firstName, string lastName) {
-            TavernWench.Remember(() => new User {
+        private Actor RememberAndGimme(string firstName, string lastName) {
+            TavernWench.Remember(() => new Actor {
                 FirstName = firstName,
                 LastName = lastName
             });
-            return TavernWench.Gimme<User>(firstName);
+            return TavernWench.Gimme<Actor>(firstName);
         }
         #endregion
 
         [SetUp]
         public void ResetConfiguration() {
             TavernWench.Forget();
-            TavernWench.Config<User>(m => { m.SetKey(u => u.FirstName); });
+            TavernWench.Config<Actor>(m => { m.SetKey(u => u.FirstName); });
         }
 
         [Test]
@@ -81,16 +81,16 @@ namespace TavernWench.Test.NoPersistence {
 
         [Test]
         public void CannotAskForUnknownType() {
-            Assert.Throws<NeverHeardAboutThisClassException>(() => { TavernWench.Gimme<User>(_jennasFirstName); });
+            Assert.Throws<NeverHeardAboutThisClassException>(() => { TavernWench.Gimme<Actor>(_jennasFirstName); });
         }
 
         [Test]
         public void CannotAskForUnknownKey() {
-            TavernWench.Remember(() => new User {
+            TavernWench.Remember(() => new Actor {
                 FirstName = _jennasFirstName,
                 LastName = _jennasChangedLastName
             });
-            Assert.Throws<NeverHeardAboutThisKeyException>(() => { TavernWench.Gimme<User>(_petersFirstName); });
+            Assert.Throws<NeverHeardAboutThisKeyException>(() => { TavernWench.Gimme<Actor>(_petersFirstName); });
         }
     }
 }

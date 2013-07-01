@@ -29,6 +29,6 @@ namespace TavernWench.Exceptions {
     /// <summary>
     /// 
     /// </summary>
-    public class DatabasePKMustBeFieldOrProperty : Exception { }
+    public class DatabasePKMustBeProperty : Exception { }
     
 }
